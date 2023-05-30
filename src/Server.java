@@ -1,24 +1,25 @@
-import java.io.BufferedReader;
 import java.io.IOException;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 public class Server {
-    private static final String API_KEY_ENV_VARIABLE = "API_KEY";
-    //    private static final String DATABASE_URL = "jdbc:sqlite:path-to-your-sqlite-database";
+    private static final String API_KEY;
+
+    static {
+        Dotenv dotenv = Dotenv.configure().directory(".env").load();
+        API_KEY = dotenv.get("API_KEY");
+    }
 
     static class DataHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String requestMethod = exchange.getRequestMethod();
             if (requestMethod.equalsIgnoreCase("PUT")) {
-                String apiKey = System.getenv(API_KEY_ENV_VARIABLE);
+                String apiKey = System.getenv(API_KEY);
                 String requestApiKey = exchange.getRequestHeaders().getFirst("Authorization");
 
                 if (requestApiKey == null || !requestApiKey.equals(apiKey)) {
@@ -47,6 +48,10 @@ public class Server {
         OutputStream outputStream = exchange.getResponseBody();
         outputStream.write(response.getBytes());
         outputStream.close();
+    }
+    public static boolean validateApiKey(HttpExchange exchange) {
+        String apiKey = exchange.getRequestHeaders().getFirst("kunci_API");
+        return apiKey != null && apiKey.equals(API_KEY);
     }
 
 }

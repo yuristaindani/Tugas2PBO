@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 public class Main {
     public static void main(String[] args) throws IOException {
         // Mengatur port untuk API
-        int port = 7078;
+        int port = 8078;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }
