@@ -27,14 +27,6 @@ public class Server {
                     return;
                 }
 
-                // Proses permintaan dan manipulasi database
-                // ...
-                // Contoh: Menambahkan data ke database
-                // String jsonData = requestBodyToString(exchange);
-                // Data data = parseJsonData(jsonData);
-                // insertDataToDatabase(data);
-                // sendResponse(exchange, 200, "Data added to database.");
-
                 sendResponse(exchange, 200, "Request authorized. Data added to database.");
             } else {
                 sendResponse(exchange, 404, "Not Found");
