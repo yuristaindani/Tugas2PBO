@@ -1,54 +1,52 @@
-import com.sun.net.httpserver.HttpExchange;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 
-class Server {
-    static void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
-        exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-        OutputStream output = exchange.getResponseBody();
-        output.write(response.getBytes());
-        output.flush();
-        output.close();
-    }
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
-    static Request getRequest(HttpExchange exchange) throws IOException {
-        InputStreamReader reader = new InputStreamReader(exchange.getRequestBody());
-        StringBuilder sb = new StringBuilder();
-        int data;
-        try {
-            while ((data = reader.read()) != -1) {
-                sb.append((char) data);
-            }
+public class Server {
+    private static final String API_KEY_ENV_VARIABLE = "API_KEY";
+    //    private static final String DATABASE_URL = "jdbc:sqlite:path-to-your-sqlite-database";
 
-            String requestBody = sb.toString();
-            String[] requestBodyParts = requestBody.split("&");
-            String name = null;
-            double price = 0.0;
-            for (String part : requestBodyParts) {
-                String[] keyValue = part.split("=");
-                if (keyValue.length == 2) {
-                    String key = keyValue[0];
-                    String value = keyValue[1];
-                    if (key.equals("name")) {
-                        name = value;
-                    } else if (key.equals("price")) {
-                        price = Double.parseDouble(value);
-                    }
+    static class DataHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String requestMethod = exchange.getRequestMethod();
+            if (requestMethod.equalsIgnoreCase("PUT")) {
+                String apiKey = System.getenv(API_KEY_ENV_VARIABLE);
+                String requestApiKey = exchange.getRequestHeaders().getFirst("Authorization");
+
+                if (requestApiKey == null || !requestApiKey.equals(apiKey)) {
+                    sendResponse(exchange, 401, "Unauthorized");
+                    return;
                 }
+
+                // Proses permintaan dan manipulasi database
+                // ...
+                // Contoh: Menambahkan data ke database
+                // String jsonData = requestBodyToString(exchange);
+                // Data data = parseJsonData(jsonData);
+                // insertDataToDatabase(data);
+                // sendResponse(exchange, 200, "Data added to database.");
+
+                sendResponse(exchange, 200, "Request authorized. Data added to database.");
+            } else {
+                sendResponse(exchange, 404, "Not Found");
             }
-            return new Request(name, price);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-        return null;
     }
 
-    static int getProductIdFromPath(String path) {
-        // Mendapatkan ID produk dari URL path
-        String[] pathParts = path.split("/");
-        return Integer.parseInt(pathParts[pathParts.length - 1]);
+    private static void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(statusCode, response.length());
+        OutputStream outputStream = exchange.getResponseBody();
+        outputStream.write(response.getBytes());
+        outputStream.close();
     }
+
 }

@@ -1,33 +1,21 @@
-class Request {
-    private int id;
-    private String name;
-    private double price;
+import com.sun.net.httpserver.HttpExchange;
 
-    public Request(String name, double price) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-    public String getName() {
-        return name;
-    }
+public class Request {
+    public static String getRequestData(HttpExchange exchange) throws IOException {
+        InputStream inputStream = exchange.getRequestBody();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
+        StringBuilder requestData = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            requestData.append(line);
+        }
+        reader.close();
+        return requestData.toString();
     }
 }

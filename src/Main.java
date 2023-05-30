@@ -1,40 +1,27 @@
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        // Inisialisasi HTTP Server
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        // Mengatur port untuk API
+        int port = 7078;
+        if (args.length > 0) {
+            port = Integer.parseInt(args[0]);
+        }
 
-        // Handler untuk endpoint /products
-        server.createContext("/products", new ProductHandler());
+        // Menginisialisasi server dengan port yang telah ditentukan
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // Handler untuk endpoint /products/{id}
-        server.createContext("/products/{id}", new ProductDetailHandler());
 
-        // Start server
+        server.createContext("/users", new Response.UsersHandler());
+
+
+        // Add more handlers for other endpoints (/products, /orders, /reviews) if needed
+        server.setExecutor(null);
+        server.createContext("/api/data", new Server.DataHandler());
         server.start();
-        System.out.println("Server started on port 8000.");
+        System.out.println("Listening on port: "+port);
     }
 }
-
-
-
-
-
-
-
-
-
